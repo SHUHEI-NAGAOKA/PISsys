@@ -148,7 +148,7 @@ if __name__ == "__main__":
     input_xls_file_path = '/Users/nagaokashuuhei/Desktop/sys_practice/PISsys/history_200 (1).xls'
 
     # --- 2. 変換後の.xlsxファイルを保存するフォルダを設定 (任意) ---
-    output_directory_for_conversion = '/Users/nagaokashuuhei/Desktop/sys_practice/PISsys' 
+    output_directory_for_conversion = '/Users/nagaokashuuhei/Desktop/sys_practice/PISsys。' 
 
     # --- 3. 変換後の.xlsxファイルから抽出したいセルのペアを辞書形式で設定 ---
     # キーと値がそれぞれ抽出したいセルアドレスになります。
