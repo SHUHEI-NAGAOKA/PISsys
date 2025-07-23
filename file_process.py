@@ -2,7 +2,7 @@ import os
 import requests
 import shutil
 
-destination_folder = '/Users/nagaokashuuhei/Desktop/sys_practice'
+destination_folder = '/Users/nagaokashuuhei/Desktop/sys_practice/PISsys'
 
 #ダウンロードフォルダのパスを変数に格納
 download_folder = os.path.join(os.path.expanduser('~'), 'Downloads')
@@ -21,5 +21,19 @@ if not files:
 
 latest_file = max(files, key=os.path.getmtime)
 
+#ファイルの名称をfile_nameに格納。あとで移動元のディレクトリの名称とjoinさせる際に使用する
 file_name = os.path.basename(latest_file)
 
+#移動もとのファイルのパスを変数に格納
+source_path = latest_file
+
+#ファイルを移動する処理をした際のパスを指定
+destination_path = os.path.join(destination_folder, file_name)
+
+try:
+	shutil.move(source_path, destination_path)
+	print(f"最も新しいファイル '{file_name}' を '{destination_folder}' に移動しました。")
+	print(f"移動元: {source_path}")
+	print(f"移動先: {destination_path}")
+except Exception as e:
+	print(f"ファイルの移動中にエラーが発生しました: {e}")
