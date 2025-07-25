@@ -48,96 +48,94 @@ def login(user_id,kyoten_id,password,taion):
     element.click()
 
 
-#実行コード
-login("10","t22wj","10","36.4")
+    #現在のウィンドウの識別子を変数に格納
+    original_window = driver.current_window_handle
+    try:
+        WebDriverWait(driver, 10).until(EC.number_of_windows_to_be(2))
+        all_window_handles = driver.window_handles
+        new_window_handle = None
 
-original_window = driver.current_window_handle
-print(f"元のウィンドウハンドル: {original_window}")
+        for handle in all_window_handles:
+            if handle != original_window:
+                new_window_handle = handle
+                break
 
+        if new_window_handle:
+            driver.switch_to.window(new_window_handle)
 
-try:
-    print("新しいウィンドウ（タブ）が開くのを待機中...")
-    WebDriverWait(driver, 10).until(EC.number_of_windows_to_be(2))
-    print("新しいウィンドウ（タブ）が出現しました。")
+        else:
+            raise Exception("新しいウィンドウハンドルが見つかりませんでした。")
 
-    all_window_handles = driver.window_handles
-    print(f"取得した全てのウィンドウハンドル: {all_window_handles}")
+        WebDriverWait(driver, 20).until(
+            EC.presence_of_element_located((By.XPATH, "//*[contains(text(), 'メインメニュー')]"))
+        )
 
-    new_window_handle = None
-    for handle in all_window_handles:
-        if handle != original_window:
-            new_window_handle = handle
-            break
+        rireki = WebDriverWait(driver, 20).until(
+            EC.element_to_be_clickable((By.XPATH, "//a[contains(@href, '/search.do') and contains(., '施術履歴を印刷する')]"))
+        )
+        rireki.click()
 
-    if new_window_handle:
-        driver.switch_to.window(new_window_handle)
-        print(f"新しいウィンドウ（ハンドル: {new_window_handle}）に切り替えました。")
-    else:
-        raise Exception("新しいウィンドウハンドルが見つかりませんでした。")
-
-    print("新しいタブでメインメニューページ読み込みを待機中...")
-    WebDriverWait(driver, 20).until(
-        EC.presence_of_element_located((By.XPATH, "//*[contains(text(), 'メインメニュー')]"))
-    )
-    print("メインメニューページへの遷移を確認しました。")
-
-    print("「施術履歴を印刷する」リンクを待機中...")
-    # ★★★★ ここが修正されたXPathです ★★★★
-    rireki = WebDriverWait(driver, 20).until(
-        EC.element_to_be_clickable((By.XPATH, "//a[contains(@href, '/search.do') and contains(., '施術履歴を印刷する')]"))
-    )
-    rireki.click()
-    print("「施術履歴を印刷する」リンクをクリックしました。")
-
-except Exception as e:
-    print(f"要素の検索またはクリック中にエラーが発生しました: {e}")
-    screenshot_path = "error_screenshot_after_login_attempt.png"
-    driver.save_screenshot(screenshot_path)
-    print(f"エラー時のスクリーンショットを '{screenshot_path}' に保存しました。")
-    print("--- 最終的なページのソースコード（新しいタブに切り替え後の場合） ---")
-    print(driver.page_source)
-    print("--------------------------")
-    driver.quit()
-    exit()
-
-time.sleep(2)
-
-paitiant_info = WebDriverWait(driver, 20).until(
-        EC.element_to_be_clickable((By.XPATH, "//a[contains(@href, '/printOnly.do') and contains(., '岡本')]"))
-    )
-paitiant_info.click()
-
-time.sleep(5)
+    except Exception as e:
+        print(f"要素の検索またはクリック中にエラーが発生しました: {e}")
+        screenshot_path = "error_screenshot_after_login_attempt.png"
+        driver.save_screenshot(screenshot_path)
+        print(f"エラー時のスクリーンショットを '{screenshot_path}' に保存しました。")
+        print("--- 最終的なページのソースコード（新しいタブに切り替え後の場合） ---")
+        print(driver.page_source)
+        print("--------------------------")
+        driver.quit()
+        exit()
 
 
-year_start = driver.find_element(By.NAME, 'optYearStart')
-month_start = driver.find_element(By.NAME, 'optMonthStart')
-day_start = driver.find_element(By.NAME, 'optDayStart')
+#実行ブロック
 
-year_end = driver.find_element(By.NAME, 'optYearEnd')
-month_end = driver.find_element(By.NAME, 'optMonthEnd')
-day_end = driver.find_element(By.NAME, 'optDayEnd')
+#ユーザーの情報をこちらに入力
+user_id = "10"
+kyoten_id = "t22wj"
+password = "10"
+taion = "36.4" #あとで体温をランダムに変更する処理もする
 
-select_year_start = Select(year_start)
-select_year_start.select_by_value('2025')
-select_month_start = Select(month_start)
-select_month_start.select_by_value('6')
-select_day_start = Select(day_start)
-select_day_start.select_by_value('1')
+#以下実行の処理の記述
+login(user_id,kyoten_id,password,taion)
 
-select_year_end = Select(year_end)
-select_year_end.select_by_value('2025')
-select_month_end = Select(month_end)
-select_month_end.select_by_value('6')
-select_day_end = Select(day_end)
-select_day_end.select_by_value('31')
+# time.sleep(2)
+
+# paitiant_info = WebDriverWait(driver, 20).until(
+#         EC.element_to_be_clickable((By.XPATH, "//a[contains(@href, '/printOnly.do') and contains(., '岡本')]"))
+#     )
+# paitiant_info.click()
+
+# time.sleep(5)
 
 
-output_btn = driver.find_element(By.NAME, 'excel')
-output_btn.click()
+# year_start = driver.find_element(By.NAME, 'optYearStart')
+# month_start = driver.find_element(By.NAME, 'optMonthStart')
+# day_start = driver.find_element(By.NAME, 'optDayStart')
+
+# year_end = driver.find_element(By.NAME, 'optYearEnd')
+# month_end = driver.find_element(By.NAME, 'optMonthEnd')
+# day_end = driver.find_element(By.NAME, 'optDayEnd')
+
+# select_year_start = Select(year_start)
+# select_year_start.select_by_value('2025')
+# select_month_start = Select(month_start)
+# select_month_start.select_by_value('6')
+# select_day_start = Select(day_start)
+# select_day_start.select_by_value('1')
+
+# select_year_end = Select(year_end)
+# select_year_end.select_by_value('2025')
+# select_month_end = Select(month_end)
+# select_month_end.select_by_value('6')
+# select_day_end = Select(day_end)
+# select_day_end.select_by_value('31')
 
 
-time.sleep(5)
+# output_btn = driver.find_element(By.NAME, 'excel')
+# output_btn.click()
+
+
+# time.sleep(5)
 
 
 driver.quit()
