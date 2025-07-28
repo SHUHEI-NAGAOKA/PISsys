@@ -1,5 +1,8 @@
 import time
 import chromedriver_binary
+import os
+import requests
+import shutil
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import Select
@@ -136,6 +139,27 @@ def get_paitiants_info(paitiants_list):
         print("リストが引数に渡されていません")
 
 
+def move_file(paitiants_list):
+    files = []
+    for entry in os.listdir(download_folder):
+        full_path = os.path.join(download_folder, entry)
+        if os.path.isfile(full_path):
+            files.append(full_path)
+
+    for paitiant in reversed(paitiants_list):
+        latest_file = max(files, key=os.path.getmtime)
+        file_name = os.path.basename(latest_file)
+        source_path = latest_file
+        destination_path = os.path.join(destination_folder, file_name)
+
+        try:
+            shutil.move(source_path, destination_path)
+        except Exception as e:
+            print('ファイルの移動中にエラーが発生しました')
+
+        files.remove(latest_file)
+
+
 #実行ブロック--------------------------------------------
 
 #ユーザーの情報をこちらに入力
@@ -155,6 +179,12 @@ input_month_end = "6"
 input_day_end = "31"
 
 
+destination_folder = '/Users/nagaokashuuhei/Desktop/sys_practice/PISsys'
+#ダウンロードフォルダのパスを変数に格納
+download_folder = os.path.join(os.path.expanduser('~'), 'Downloads')
+
+
 login(user_id,kyoten_id,password,taion)
 get_paitiants_info(paitiants_list)
 driver.quit()
+move_file(paitiants_list)
