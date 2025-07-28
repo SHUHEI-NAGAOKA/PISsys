@@ -59,7 +59,7 @@ def login(user_id,kyoten_id,password,taion):
             if handle != original_window:
                 new_window_handle = handle
                 break
-
+        #ログインが成功して新しいタブが開いたらそちらに切り替え
         if new_window_handle:
             driver.switch_to.window(new_window_handle)
 
@@ -70,6 +70,7 @@ def login(user_id,kyoten_id,password,taion):
             EC.presence_of_element_located((By.XPATH, "//*[contains(text(), 'メインメニュー')]"))
         )
 
+        #施術履歴のページに遷移
         rireki = WebDriverWait(driver, 20).until(
             EC.element_to_be_clickable((By.XPATH, "//a[contains(@href, '/search.do') and contains(., '施術履歴を印刷する')]"))
         )
@@ -87,7 +88,55 @@ def login(user_id,kyoten_id,password,taion):
         exit()
 
 
-#実行ブロック
+def get_paitiants_info(paitiants_list):
+    if type(paitiants_list) is list:
+        for paitiant in paitiants_list:
+            try:
+                paitiant_info = WebDriverWait(driver, 20).until(EC.element_to_be_clickable((By.XPATH, f"//a[contains(@href, '/printOnly.do') and contains(., '{paitiant}')]")))
+            except Exception as e:
+                print("患者情報が見つかりませんでした")
+
+            paitiant_info.click()
+            time.sleep(2)
+
+
+            year_start = driver.find_element(By.NAME, 'optYearStart')
+            month_start = driver.find_element(By.NAME, 'optMonthStart')
+            day_start = driver.find_element(By.NAME, 'optDayStart')
+
+            year_end = driver.find_element(By.NAME, 'optYearEnd')
+            month_end = driver.find_element(By.NAME, 'optMonthEnd')
+            day_end = driver.find_element(By.NAME, 'optDayEnd')
+
+            select_year_start = Select(year_start)
+            select_year_start.select_by_value(input_year_start)
+            select_month_start = Select(month_start)
+            select_month_start.select_by_value(input_month_start)
+            select_day_start = Select(day_start)
+            select_day_start.select_by_value(input_day_start)
+
+            select_year_end = Select(year_end)
+            select_year_end.select_by_value(input_year_end)
+            select_month_end = Select(month_end)
+            select_month_end.select_by_value(input_month_end)
+            select_day_end = Select(day_end)
+            select_day_end.select_by_value(input_day_end)
+
+            output_btn = driver.find_element(By.NAME, 'excel')
+            output_btn.click()
+
+            time.sleep(3)
+            back = WebDriverWait(driver, 20).until(
+            EC.element_to_be_clickable((By.XPATH, "//a[contains(@href, '/search.do') and contains(., '検索')]")))
+            back.click()
+            time.sleep(3)
+
+
+    else:
+        print("リストが引数に渡されていません")
+
+
+#実行ブロック--------------------------------------------
 
 #ユーザーの情報をこちらに入力
 user_id = "10"
@@ -95,47 +144,17 @@ kyoten_id = "t22wj"
 password = "10"
 taion = "36.4" #あとで体温をランダムに変更する処理もする
 
-#以下実行の処理の記述
+paitiants_list = ['岡本','手塚']
+
+input_year_start = "2025"
+input_month_start = "6"
+input_day_start = "1"
+
+input_year_end = "2025"
+input_month_end = "6"
+input_day_end = "31"
+
+
 login(user_id,kyoten_id,password,taion)
-
-# time.sleep(2)
-
-# paitiant_info = WebDriverWait(driver, 20).until(
-#         EC.element_to_be_clickable((By.XPATH, "//a[contains(@href, '/printOnly.do') and contains(., '岡本')]"))
-#     )
-# paitiant_info.click()
-
-# time.sleep(5)
-
-
-# year_start = driver.find_element(By.NAME, 'optYearStart')
-# month_start = driver.find_element(By.NAME, 'optMonthStart')
-# day_start = driver.find_element(By.NAME, 'optDayStart')
-
-# year_end = driver.find_element(By.NAME, 'optYearEnd')
-# month_end = driver.find_element(By.NAME, 'optMonthEnd')
-# day_end = driver.find_element(By.NAME, 'optDayEnd')
-
-# select_year_start = Select(year_start)
-# select_year_start.select_by_value('2025')
-# select_month_start = Select(month_start)
-# select_month_start.select_by_value('6')
-# select_day_start = Select(day_start)
-# select_day_start.select_by_value('1')
-
-# select_year_end = Select(year_end)
-# select_year_end.select_by_value('2025')
-# select_month_end = Select(month_end)
-# select_month_end.select_by_value('6')
-# select_day_end = Select(day_end)
-# select_day_end.select_by_value('31')
-
-
-# output_btn = driver.find_element(By.NAME, 'excel')
-# output_btn.click()
-
-
-# time.sleep(5)
-
-
+get_paitiants_info(paitiants_list)
 driver.quit()
