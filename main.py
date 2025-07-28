@@ -3,6 +3,7 @@ import chromedriver_binary
 import os
 import requests
 import shutil
+import pyexcel as p
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import Select
@@ -139,7 +140,7 @@ def get_paitiants_info(paitiants_list):
         print("リストが引数に渡されていません")
 
 
-def move_file(paitiants_list):
+def move_file(paitiants_list,file_list):
     files = []
     for entry in os.listdir(download_folder):
         full_path = os.path.join(download_folder, entry)
@@ -157,7 +158,43 @@ def move_file(paitiants_list):
         except Exception as e:
             print('ファイルの移動中にエラーが発生しました')
 
+        file_list.append(destination_path)
+
         files.remove(latest_file)
+
+
+def convert_xls_to_xlsx_in_directory(directory_path):
+    """
+    指定されたディレクトリ内の .xls ファイルを .xlsx に変換する関数
+    
+    Args:
+        directory_path (str): 検索対象のディレクトリパス
+    """
+    if not os.path.isdir(directory_path):
+        print(f"エラー: ディレクトリ '{directory_path}' が見つかりません。")
+        return
+
+    # 指定されたディレクトリ内のファイルをリストアップ
+    for filename in os.listdir(directory_path):
+        # ファイルのフルパスを作成
+        filepath = os.path.join(directory_path, filename)
+        
+        # ファイルであり、かつ .xls 拡張子を持つか確認
+        if os.path.isfile(filepath) and filename.endswith('.xls'):
+            try:
+                # 新しいファイル名 (拡張子を .xlsx に変更)
+                output_filename = filename.replace('.xls', '.xlsx')
+                output_filepath = os.path.join(directory_path, output_filename)
+                
+                # pyexcel を使って変換を実行
+                book = p.get_book(file_name=filepath)
+                book.save_as(output_filepath)
+                
+                print(f"変換成功: '{filename}' -> '{output_filename}'")
+                os.remove(filepath)
+                
+            except Exception as e:
+                print(f"変換失敗: '{filename}' - エラー: {e}")
 
 
 #実行ブロック--------------------------------------------
@@ -179,12 +216,13 @@ input_month_end = "6"
 input_day_end = "31"
 
 
-destination_folder = '/Users/nagaokashuuhei/Desktop/sys_practice/PISsys'
+destination_folder = '/Users/nagaokashuuhei/Desktop/sys_practice/PISsys/paitiants_info'
 #ダウンロードフォルダのパスを変数に格納
 download_folder = os.path.join(os.path.expanduser('~'), 'Downloads')
-
+translate_files = []
 
 login(user_id,kyoten_id,password,taion)
 get_paitiants_info(paitiants_list)
 driver.quit()
-move_file(paitiants_list)
+move_file(paitiants_list,translate_files)
+convert_xls_to_xlsx_in_directory(destination_folder)
