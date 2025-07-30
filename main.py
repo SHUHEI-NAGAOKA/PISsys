@@ -103,7 +103,7 @@ def get_paitiants_info(paitiants_list):
             paitiant_info.click()
             time.sleep(2)
 
-
+            #後々タプルで日付を渡して簡略化した処理をするようにする。
             year_start = driver.find_element(By.NAME, 'optYearStart')
             month_start = driver.find_element(By.NAME, 'optMonthStart')
             day_start = driver.find_element(By.NAME, 'optDayStart')
@@ -197,6 +197,43 @@ def convert_xls_to_xlsx_in_directory(directory_path):
                 print(f"変換失敗: '{filename}' - エラー: {e}")
 
 
+
+def scan_paitiant_info(file_path,name_cell,date_column,record_column,append_file):
+    try:
+        wb = openpyxl.load_workbook(filepath, data_only = True)
+        sheet_1 = wb['施術履歴']
+        name = sheet_1[name_cell].value
+
+        result_dict = {}
+
+        for sheet_name in wb.sheetnames:
+            date_recoord_dict = {}
+            sheet = wb[sheet_name]
+
+            date_col_index = openpyxl.utils.column_index_from_string(date_column)
+            record_col_index = openpyxl.utils.column_index_from_string(record_column)
+
+            for row in range(8,sheet.max_row + 1,1):
+                date_cell = sheet.cell(row = row,column = date_col_index)
+                record_cell = sheet.cell(row = row,column = record_col_index)
+
+                if date_cell.value is not None and record_cell.value is not None and str(record_cell.value).startswith('#') != True:
+                    date_key = date_cell.value
+                    date_recoord_dict[date_key] = record_cell.value
+
+            result_dict[sheet_name] = {
+                '氏名' : name ,
+                'データ' : date_recoord_dict
+            }
+
+        print(result_dict)
+        result_dict.append(append_file)
+
+
+    except Exception as e:
+        print('ファイルの読み取り時にエラーが発生しました')
+
+
 #実行ブロック--------------------------------------------
 
 #ユーザーの情報をこちらに入力
@@ -220,9 +257,16 @@ destination_folder = '/Users/nagaokashuuhei/Desktop/sys_practice/PISsys/paitiant
 #ダウンロードフォルダのパスを変数に格納
 download_folder = os.path.join(os.path.expanduser('~'), 'Downloads')
 translate_files = []
+name_cell = 'M5'
+date_column = 'A'
+record_column = 'V'
+send_api_text = []
 
 login(user_id,kyoten_id,password,taion)
 get_paitiants_info(paitiants_list)
 driver.quit()
 move_file(paitiants_list,translate_files)
 convert_xls_to_xlsx_in_directory(destination_folder)
+for xlsx_file in os.listdir(destination_folder):
+    scan_paitiant_info(xlsx_file,name_cell,date_column,record_column,send_api_text)
+print(send_api_text)

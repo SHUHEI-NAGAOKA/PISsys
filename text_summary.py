@@ -201,7 +201,7 @@ output_xlsx_file = '/Users/nagaokashuuhei/Desktop/sys_practice/PISsys/history_20
 # convert_xls_to_xlsx_in_directory(directory_to_convert)
 
 
-def test(filepath,name_cell,date_column,record_column):
+def test(file_path,name_cell,date_column,record_column):
     try:
         wb = openpyxl.load_workbook(filepath, data_only = True)
         sheet_1 = wb['施術履歴']
@@ -233,11 +233,7 @@ def test(filepath,name_cell,date_column,record_column):
 
 
     except Exception as e:
-        raise
-    else:
-        pass
-    finally:
-        pass
+        print('ファイルの読み取り時にエラーが発生しました')
 
 
 paitiant_file = '/Users/nagaokashuuhei/Desktop/sys_practice/PISsys/paitiants_info/history_200 (3).xlsx'
