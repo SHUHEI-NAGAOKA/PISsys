@@ -203,7 +203,7 @@ output_xlsx_file = '/Users/nagaokashuuhei/Desktop/sys_practice/PISsys/history_20
 
 def test(file_path,name_cell,date_column,record_column):
     try:
-        wb = openpyxl.load_workbook(filepath, data_only = True)
+        wb = openpyxl.load_workbook(file_path, data_only = True)
         sheet_1 = wb['施術履歴']
         name = sheet_1[name_cell].value
 

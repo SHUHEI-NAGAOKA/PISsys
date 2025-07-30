@@ -4,6 +4,9 @@ import os
 import requests
 import shutil
 import pyexcel as p
+import openpyxl
+import google.generativeai as genai
+from openpyxl.utils import get_column_letter
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import Select
@@ -200,7 +203,7 @@ def convert_xls_to_xlsx_in_directory(directory_path):
 
 def scan_paitiant_info(file_path,name_cell,date_column,record_column,append_file):
     try:
-        wb = openpyxl.load_workbook(filepath, data_only = True)
+        wb = openpyxl.load_workbook(file_path, data_only = True)
         sheet_1 = wb['施術履歴']
         name = sheet_1[name_cell].value
 
@@ -226,12 +229,12 @@ def scan_paitiant_info(file_path,name_cell,date_column,record_column,append_file
                 'データ' : date_recoord_dict
             }
 
-        print(result_dict)
-        result_dict.append(append_file)
+        append_file.append(result_dict)
 
 
     except Exception as e:
         print('ファイルの読み取り時にエラーが発生しました')
+        print(e)
 
 
 #実行ブロック--------------------------------------------
@@ -262,11 +265,15 @@ date_column = 'A'
 record_column = 'V'
 send_api_text = []
 
+#geminiのAPIキー
+API_KEY = "AIzaSyBoGWeZNwI7emgNasTDu5CZXeTezLNxliA"
+
 login(user_id,kyoten_id,password,taion)
 get_paitiants_info(paitiants_list)
 driver.quit()
 move_file(paitiants_list,translate_files)
 convert_xls_to_xlsx_in_directory(destination_folder)
 for xlsx_file in os.listdir(destination_folder):
-    scan_paitiant_info(xlsx_file,name_cell,date_column,record_column,send_api_text)
+    file_full_path = os.path.join(destination_folder,xlsx_file)
+    scan_paitiant_info(file_full_path,name_cell,date_column,record_column,send_api_text)
 print(send_api_text)
