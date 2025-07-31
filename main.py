@@ -261,15 +261,15 @@ kyoten_id = "t22wj"
 password = "10"
 taion = "36.4" #あとで体温をランダムに変更する処理もする
 
-paitiants_list = ['岡本','手塚']
+paitiants_list = ['鈴木','奥寺','小山','根来','廣木','田中']
 
 input_year_start = "2025"
 input_month_start = "6"
 input_day_start = "1"
 
 input_year_end = "2025"
-input_month_end = "6"
-input_day_end = "31"
+input_month_end = "7"
+input_day_end = "20"
 
 
 destination_folder = '/Users/nagaokashuuhei/Desktop/sys_practice/PISsys/paitiants_info'
