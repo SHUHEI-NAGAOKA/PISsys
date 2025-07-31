@@ -237,6 +237,22 @@ def scan_paitiant_info(file_path,name_cell,date_column,record_column,append_file
         print(e)
 
 
+
+def get_gemini_responce(prompt_text: str) ->str:
+    genai.configure(api_key=API_KEY)
+    model = genai.GenerativeModel("gemini-2.0-flash")
+    try:
+        responce = model.generate_content(prompt_text)
+        if hasattr(responce, "text"):
+            return responce.text
+        else:
+            return "Geminiからの回答がありませんでした、またはテキスト形式ではありませんでした。"
+
+
+    except Exception as e:
+        return f"Gemini API呼び出し中にエラーが発生しました: {e}"
+
+
 #実行ブロック--------------------------------------------
 
 #ユーザーの情報をこちらに入力
@@ -267,6 +283,27 @@ send_api_text = []
 
 #geminiのAPIキー
 API_KEY = "AIzaSyBoGWeZNwI7emgNasTDu5CZXeTezLNxliA"
+prompt = '''
+データ構造は[]のリストで囲まれており、その中は###で囲んでいるテキストのようにpythonの辞書型が複層的に重なっている構造をしています。
+###
+{シート名:{氏名:患者の氏名,データ:{日付:施術記録}},シート名:{氏名:患者の氏名,データ:{日付:施術記録}}}
+###
+
+###で囲まれた文章の説明をします。
+・患者に対する施術の記録をまとめたテキストになっています
+・「氏名:患者の氏名」は患者の氏名を指しています。
+・「データ:{日付:施術記録}」の日付は施術した日付、施術記録は施術した内容を扱っています。
+
+これを理解した上で、%%%で囲まれたテキストデータ（以降「データ」といいます）を読み取り、以下の作業を行ってください
+1. これから患者ごとの施術履歴の要約を作ってもらいます
+2. まずは患者ごとにデータを読み取ってください
+3. 次に、施術記録から行った施術内容と患者の反応を読み取ってください
+4. それぞれの患者ごとに要約の文章を作成してください。
+5. 要約文章は、「患者氏名」「施術内容の要約」「患者の反応や経過の要約」の項目に分けて記述してください
+6. 要約文章は日付ごとに分けず、全体の経過を記した文章にまとめてください。極力提供されたデータの内容を網羅的に要約してください。
+7. データとして提供されたこと以外は参考にせずに記述してください
+8. 要約した文章のみを出力してください
+'''
 
 login(user_id,kyoten_id,password,taion)
 get_paitiants_info(paitiants_list)
@@ -276,4 +313,6 @@ convert_xls_to_xlsx_in_directory(destination_folder)
 for xlsx_file in os.listdir(destination_folder):
     file_full_path = os.path.join(destination_folder,xlsx_file)
     scan_paitiant_info(file_full_path,name_cell,date_column,record_column,send_api_text)
-print(send_api_text)
+prompt_text = f"{str(send_api_text)}{prompt}"
+responce = get_gemini_responce(prompt_text)
+print(responce)
